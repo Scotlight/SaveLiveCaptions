@@ -71,8 +71,8 @@ Your captions are saved as `YYYY-MM-DD_HH-MM-SS_captions.txt` with enhanced form
 
 ```
 [19:00:44] I bought all the food you like, dear.
-[19:00:45] ===== 录制暂停 =====
-[19:01:15] ===== 录制继续 =====
+[19:00:45] ===== Recording Paused =====
+[19:01:15] ===== Recording Resumed =====
 [19:01:16] Thank you so much for this.
 ```
 
