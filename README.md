@@ -2,6 +2,13 @@
 
 **Tired of losing live captions on Windows?** This is an enhanced tool to save and manage live captions with improved functionality! The application is in the `dist` folder and you can also download from release.
 
+---
+
+**🌐 Language / 语言:**
+📖 [English](README.md) | [中文](README_zh.md)
+
+---
+
 ## 🙏 Acknowledgments
 
 This is a fork of the original [SaveLiveCaptions](https://github.com/M-T-Arden/SaveLiveCaptions) project by [M-T-Arden](https://github.com/M-T-Arden). Thank you for creating this amazing tool!
