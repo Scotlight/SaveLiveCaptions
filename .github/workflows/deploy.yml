@@ -26,13 +26,13 @@ jobs:
 
     - name: Build exe
       run: |
-        pyinstaller --onefile --windowed --name savelivecaptions src/main.py  
+        pyinstaller --onefile --windowed --name SaveLiveCaptions src/main.py  
 
     - name: Upload to Artifacts (for quick testing)
       uses: actions/upload-artifact@v4
       with:
-        name: savelivecaptions-exe
-        path: dist/savelivecaptions.exe
+        name: SaveLiveCaptions-exe
+        path: dist/SaveLiveCaptions.exe
         retention-days: 7  
 
     - name: Create Release and Upload exe (only on tags)
