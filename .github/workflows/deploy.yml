@@ -28,7 +28,7 @@ jobs:
       run: |
         pyinstaller --onefile --windowed --name savelivecaptions src/main.py  
 
-    - name: Upload to Artifacts (for quick testing)
+    - name: Upload Artifacts (for quick testing)
       uses: actions/upload-artifact@v4
       with:
         name: savelivecaptions-exe

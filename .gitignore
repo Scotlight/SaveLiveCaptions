@@ -1,0 +1,6 @@
+backup/
+new/
+dist/
+build/
+*.spec
+src/@*.txt
