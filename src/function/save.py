@@ -95,7 +95,7 @@ async def save_txt(filename, caption):
     pass
 
 def merge_cache_to_file():
-    """读取缓存文件，智能合并句子后写入最终文件"""
+    """读取缓存文件，智能合并句子后写入最终文件，优化阅读体验"""
     global cache_filename, current_filename, line_buffer
 
     if not cache_filename or not os.path.exists(cache_filename):
@@ -117,54 +117,41 @@ def merge_cache_to_file():
         if not lines_data:
             return
 
-        # 合并逻辑
-        final_lines = []
-        current_segment = []
-        start_time = None
-        end_time = None
+        # 合并所有文本片段成一个连续的文本
+        all_text = ""
+        first_timestamp = lines_data[0][0] if lines_data else ""
 
         for timestamp, text in lines_data:
-            # 检查是否有标点符号
-            has_sentence_end = bool(re.search(r'[。！？.!?]', text))
+            all_text += text
 
-            if not start_time:
-                start_time = timestamp
+        # 清理文本（移除多余空格）
+        all_text = re.sub(r'\s+', ' ', all_text).strip()
 
-            current_segment.append(text)
-            end_time = timestamp
+        # 按句末标点分割句子
+        sentences = re.split(r'([.!?。！？])', all_text)
 
-            # 如果有句末标点，结束当前段落
-            if has_sentence_end:
-                merged_text = "".join(current_segment)
-                if merged_text.strip():
-                    if start_time == end_time:
-                        time_range = start_time
-                    else:
-                        time_range = f"{start_time}-{end_time}"
-                    final_lines.append((time_range, merged_text))
-                current_segment = []
-                start_time = None
-                end_time = None
-
-        # 处理最后剩余的段落（没有标点的）
-        if current_segment:
-            # 每个没有标点的片段单独一行
-            for i, text in enumerate(current_segment):
-                timestamp = lines_data[-len(current_segment) + i][0]
-                final_lines.append((timestamp, text))
+        # 重新组合句子（确保标点符号紧跟在句子后面）
+        merged_sentences = []
+        i = 0
+        while i < len(sentences):
+            if i < len(sentences) - 1 and sentences[i+1] in '.!?。！？':
+                sentence = sentences[i] + sentences[i+1]
+                merged_sentences.append(sentence.strip())
+                i += 2
+            else:
+                if sentences[i].strip():
+                    merged_sentences.append(sentences[i].strip())
+                i += 1
 
         # 写入最终文件
-        if final_lines and current_filename:
+        if merged_sentences and current_filename:
             with open(current_filename, "a", encoding="utf-8") as f:
-                for time_range, text in final_lines:
+                for sentence in merged_sentences:
                     # 避免重复保存
-                    if text not in saved_captions:
-                        if "-" in time_range:
-                            f.write(f"[{time_range}] {text}\n")
-                        else:
-                            f.write(f"[{time_range}] {text}\n")
-                        saved_captions.add(text)
-                        print(f"Merged to final file: [{time_range}] {text}")
+                    if sentence and sentence not in saved_captions:
+                        f.write(f"[{first_timestamp}] {sentence}\n")
+                        saved_captions.add(sentence)
+                        print(f"Saved sentence: {sentence[:60]}...")
 
         # 清空缓存文件
         with open(cache_filename, "w", encoding="utf-8") as f:

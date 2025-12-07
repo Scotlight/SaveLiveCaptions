@@ -8,7 +8,7 @@ import re
 import time
 
 buffer = ""
-last_second_text = ""
+last_saved_text = ""
 
 def lc_detect():
     try:
@@ -35,13 +35,31 @@ def lc_detect():
 
 def reset_hook_state():
     """重置hook状态，用于新录制"""
-    global buffer, last_second_text
+    global buffer, last_saved_text
     buffer = ""
-    last_second_text = ""
+    last_saved_text = ""
+
+
+def extract_new_text(current_text, previous_text):
+    """提取新增的文本内容"""
+    if not previous_text:
+        # 第一次，返回全部文本
+        return current_text
+
+    if current_text.startswith(previous_text):
+        # 新文本包含旧文本，返回新增部分
+        new_part = current_text[len(previous_text):].strip()
+        return new_part
+    elif previous_text.startswith(current_text):
+        # 文本缩短了，返回空
+        return ""
+    else:
+        # 完全不同的文本，返回全部
+        return current_text
 
 
 async def hook(filename, exit_event):
-    global buffer, last_second_text
+    global buffer, last_saved_text
 
     try:
         lc_flag = lc_detect()
@@ -53,7 +71,6 @@ async def hook(filename, exit_event):
         captions_scrollviewer = captions_window.Control(searchDepth=5, AutomationId="CaptionsScrollViewer", ClassName="ScrollViewer")
 
         print("Start capture...")
-        last_save_time = time.time()
 
         while not exit_event.is_set():
             # 检查是否暂停
@@ -64,19 +81,18 @@ async def hook(filename, exit_event):
             current_text = captions_scrollviewer.Name.strip()
 
             if current_text and current_text != buffer:
+                # 提取新增文本
+                new_text = extract_new_text(current_text, buffer)
                 buffer = current_text
 
-            # 检查是否已经过了1秒
-            current_time = time.time()
-            if current_time - last_save_time >= 1.0:
-                if buffer and buffer != last_second_text:
-                    # 每秒都保存到缓存
-                    print(f"Saving to cache: {buffer}")
-                    await save_to_cache(buffer)
-                    last_second_text = buffer
-                    last_save_time = current_time
+                # 保存新增内容到缓存
+                if new_text and len(new_text) > 1:
+                    print(f"New text detected: {new_text[:50]}...")
+                    await save_to_cache(new_text)
+                    last_saved_text = buffer
 
-            await asyncio.sleep(0.1)  # 更频繁的检查
+            # 检查间隔适中（避免太频繁）
+            await asyncio.sleep(0.3)
 
     except Exception as e:
         print(f"Exception caught: {e}")
