@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(git clone https://github.com/M-T-Arden/SaveLiveCaptions.git original_project)",
+      "Bash(git add -A)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nrefactor: Restore original project''s save logic\n\n- Remove caching mechanism, use direct save like original project\n- Restore original sentence splitting logic with re.split\n- Keep pause/resume/preview functionality \\(5-button UI\\)\n- Simplify save.py to match original implementation\n- Default save to /new folder instead of file dialog\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

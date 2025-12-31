@@ -4,11 +4,7 @@ import os
 import tkinter as tk
 import tkinter.messagebox as msgbox
 from function.texthook import hook, lc_detect, reset_hook_state
-from function.save import (
-    choose_save_dir, close_file, set_paused,
-    get_current_filename, reset_for_new_recording,
-    merge_cache_to_file, close_cache, cleanup_cache
-)
+from function.save import choose_save_dir, close_file, reset_for_new_recording
 import asyncio
 
 file_handle = None
@@ -19,11 +15,7 @@ current_state = "stopped"  # stopped, recording, paused
 
 async def close_all(window):
     await asyncio.sleep(0.5)
-    # 在退出前合并缓存
-    merge_cache_to_file()
-    await close_cache()
     await close_file()
-    cleanup_cache()
     window.destroy()
 
 def dashboard(loop):
@@ -70,23 +62,19 @@ def dashboard(loop):
 
     def pause_capture():
         global current_state
-        set_paused(True)
+        exit_event.set()
         current_state = "paused"
         update_ui_state()
-        # 暂停时整合缓存到文件
-        merge_cache_to_file()
-        print("Cache merged to file")
 
     def resume_capture():
         global current_state
-        set_paused(False)
+        exit_event.clear()
+        hook_task = loop.create_task(hook(current_filename, exit_event))
         current_state = "recording"
         update_ui_state()
 
     def preview_file():
         global current_filename
-        # 在预览前先合并缓存
-        merge_cache_to_file()
         if current_filename and os.path.exists(current_filename):
             os.startfile(current_filename)
         else:
