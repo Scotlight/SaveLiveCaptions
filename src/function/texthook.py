@@ -41,9 +41,20 @@ def reset_hook_state():
     processed_sentences = set()
 
 
-async def hook(filename, exit_event):
+async def hook(filename, exit_event, config=None):
+    """捕获字幕并保存
+    
+    Args:
+        filename: 保存文件路径
+        exit_event: 退出事件
+        config: 配置字典，包含 polling_interval
+    """
     global buffer, processed_sentences
     incomplete_sentence = ""
+    
+    # 从配置读取轮询间隔，默认 0.2s
+    polling_interval = config.get("polling_interval", 0.2) if config else 0.2
+    
     try:
         lc_flag = lc_detect()
         if lc_flag:
@@ -77,7 +88,7 @@ async def hook(filename, exit_event):
                 if len(sentences) % 2 == 1 and sentences[-1].strip():
                     incomplete_sentence = sentences[-1].strip()
 
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(polling_interval)
 
         if incomplete_sentence:
             print(f"Last incomplete sentence: {incomplete_sentence}")

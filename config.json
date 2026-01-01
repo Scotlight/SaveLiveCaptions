@@ -1,0 +1,6 @@
+{
+  "save_directory": "new",
+  "polling_interval": 0.2,
+  "timestamp_format": "%Y-%m-%d_%H-%M-%S",
+  "time_format": "%H:%M:%S"
+}

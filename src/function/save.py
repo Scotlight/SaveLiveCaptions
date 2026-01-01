@@ -11,34 +11,32 @@ file_handle = None
 saved_captions = set()
 save_dir = ""
 
-def choose_save_dir():
+def choose_save_dir(config=None):
+    """选择保存目录并返回文件名
+    
+    Args:
+        config: 配置字典，包含 save_directory 和 timestamp_format
+    """
     global save_dir
 
     # 获取当前脚本所在目录的上级目录（项目根目录）
     script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    default_dir = os.path.join(script_dir, "new")
+    
+    # 从配置中读取保存目录，默认为 "new"
+    save_subdir = config.get("save_directory", "new") if config else "new"
+    default_dir = os.path.join(script_dir, save_subdir)
 
-    timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())
+    # 从配置中读取时间戳格式，默认为 "%Y-%m-%d_%H-%M-%S"
+    timestamp_format = config.get("timestamp_format", "%Y-%m-%d_%H-%M-%S") if config else "%Y-%m-%d_%H-%M-%S"
+    timestamp = time.strftime(timestamp_format, time.localtime())
 
-    # 默认使用项目根目录下的 new 文件夹
+    # 默认使用项目根目录下的配置文件夹
     save_dir = default_dir
     os.makedirs(save_dir, exist_ok=True)
 
     filename = os.path.join(save_dir, f"{timestamp}_captions.txt")
 
     return filename
-
-def get_current_filename():
-    """获取当前正在使用的文件名"""
-    return None
-
-def set_paused(paused):
-    """设置暂停状态"""
-    pass
-
-def is_recording_paused():
-    """检查是否处于暂停状态"""
-    return False
 
 def reset_for_new_recording():
     """重置状态以开始新的录制"""
@@ -66,32 +64,12 @@ async def save_txt(filename, caption):
         saved_captions.add(caption)
 
 async def close_file():
-    global file_handle
-    if file_handle is not None:
-        await file_handle.close()
-        file_handle = None
-
-def merge_cache_to_file():
-    """合并缓存到文件 - 原项目不需要此功能"""
-    pass
-
-async def close_cache():
-    """关闭缓存文件 - 原项目不需要此功能"""
-    pass
-
-def cleanup_cache():
-    """删除缓存文件 - 原项目不需要此功能"""
-    pass
-
-def close_file_sync():
-    """同步关闭文件"""
+    """关闭文件句柄"""
     global file_handle
     if file_handle is not None:
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.ensure_future(close_file())
-            else:
-                loop.run_until_complete(close_file())
-        except:
+            await file_handle.close()
+            file_handle = None
+        except Exception as e:
+            print(f"关闭文件时出错: {e}")
             file_handle = None

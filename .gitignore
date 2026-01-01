@@ -4,3 +4,5 @@ dist/
 build/
 *.spec
 src/@*.txt
+__pycache__/
+.claude/
